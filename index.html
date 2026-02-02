@@ -15,7 +15,16 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffdde1 100%);
             font-family: 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
             overflow: hidden;
+            transition: all 1s;
+        }
+
+        body.sad {
+            background: linear-gradient(135deg, #434343 0%, #1a1a1a 100%);
         }
 
         .container {
@@ -27,11 +36,34 @@
             transform: translate(-50%, -50%);
         }
 
+        .sad-emoji {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
         .question {
             font-size: 3rem;
             color: #d63384;
-            margin-bottom: 50px;
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.5s;
+        }
+
+        body.sad .question {
+            color: #888;
+        }
+
+        .guilt-message {
+            font-size: 1.2rem;
+            color: #d63384;
+            margin-bottom: 40px;
+            min-height: 30px;
+            transition: all 0.5s;
+        }
+
+        body.sad .guilt-message {
+            color: #666;
         }
 
         .heart {
@@ -68,12 +100,11 @@
             background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
             color: white;
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .yes-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+            box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
         }
 
         .speech-bubble {
@@ -115,12 +146,68 @@
             color: white;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             position: fixed;
-            transition: left 0.4s ease-out, top 0.4s ease-out, transform 0.2s;
+            transition: left 0.4s ease-out, top 0.4s ease-out, transform 0.2s, background 0.3s;
             z-index: 50;
         }
 
         .no-btn:hover {
             transform: scale(1.05);
+        }
+
+        /* Rain */
+        .rain {
+            position: fixed;
+            top: -10px;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(transparent, rgba(150, 150, 150, 0.6));
+            animation: rain 0.5s linear infinite;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        body.sad .rain {
+            opacity: 1;
+        }
+
+        @keyframes rain {
+            to { transform: translateY(100vh); }
+        }
+
+        /* Thunder */
+        .thunder {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .thunder.flash {
+            animation: lightning 0.2s;
+        }
+
+        @keyframes lightning {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Tears */
+        .tear {
+            position: fixed;
+            font-size: 1.5rem;
+            animation: tearDrop 2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes tearDrop {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(150px); }
         }
 
         /* Celebration screen */
@@ -196,19 +283,23 @@
 </head>
 <body>
     <div class="container">
+        <div class="sad-emoji" id="sadEmoji">🥰</div>
         <h1 class="question">
-            Will you be my Valentine? <span class="heart">&#10084;</span>
+            Will you be my Valentine? <span class="heart">❤</span>
         </h1>
+        <p class="guilt-message" id="guiltMessage">Go on, make my day!</p>
         <div class="buttons">
             <div class="yes-wrapper">
                 <div class="speech-bubble" id="speechBubble">Hey, over here!</div>
-                <button class="yes-btn" onclick="sayYes()">Yes</button>
+                <button class="yes-btn" id="yesBtn" onclick="sayYes()">Yes</button>
             </div>
-            <div style="width: 140px;"></div> <!-- Placeholder for No button's original space -->
+            <div style="width: 140px;"></div>
         </div>
     </div>
 
     <button class="no-btn" id="noBtn">No</button>
+
+    <div class="thunder" id="thunder"></div>
 
     <div class="celebration" id="celebration">
         <div class="yay-text" id="yayText"></div>
@@ -216,116 +307,151 @@
 
     <script>
         const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const speechBubble = document.getElementById('speechBubble');
+        const sadEmoji = document.getElementById('sadEmoji');
+        const guiltMessage = document.getElementById('guiltMessage');
+        const thunder = document.getElementById('thunder');
         const celebration = document.getElementById('celebration');
         const yayText = document.getElementById('yayText');
-        const speechBubble = document.getElementById('speechBubble');
 
         // Generate the yay text with 1000 a's
         const yayString = 'y' + 'a'.repeat(1000) + 'y!';
 
-        // Speech bubble messages
-        const messages = [
-            "Hey, over here!",
-            "Pick me! Pick me!",
-            "I'm the right choice!",
-            "Come on, you know you want to!",
-            "Yes is the answer!",
-            "Don't be shy!",
-            "I promise it'll be fun!",
-            "Choose love!",
-            "This way, darling!",
-            "You won't regret it!",
-            "I'm waiting for you!",
-            "Yes yes yes!",
-            "Pretty please?",
-            "I'll make you happy!",
-            "Trust your heart!",
-            "Love is the answer!",
-            "Click me instead!",
-            "I'm right here!",
-            "Don't chase that one!",
-            "I'm much nicer!",
-            "Yes is always better!",
-            "Come to the bright side!",
-            "You're so close!",
-            "Just one little click!",
-            "I believe in us!",
-            "Say yes to love!",
-            "Best decision ever!",
-            "Your heart knows!",
-            "Follow your heart!",
-            "Yes means happiness!"
+        // Guilt stages - emoji, message for the page, what the No button says, what Yes says
+        const guiltStages = [
+            { emoji: '🥺', message: "Oh... you're considering No?", noText: "Still No", yesText: "Hey, over here!" },
+            { emoji: '😢', message: "But... I made this website for you...", noText: "Nope", yesText: "Pick me! Pick me!" },
+            { emoji: '😭', message: "I spent AGES on this! (okay like 20 mins but still)", noText: "Sorry...", yesText: "I'm the right choice!" },
+            { emoji: '💔', message: "My heart... it's breaking...", noText: "I feel bad", yesText: "Come on, you know you want to!" },
+            { emoji: '😿', message: "Even this cat is sad now. Look what you did.", noText: "...", yesText: "Don't be shy!" },
+            { emoji: '🌧️', message: "Great, now it's raining. Inside. Somehow.", noText: "Okay maybe", yesText: "Choose love!" },
+            { emoji: '😤', message: "Fine. FINE. I didn't want a Valentine anyway.", noText: "Let me think", yesText: "This way!" },
+            { emoji: '🥹', message: "Wait really?! You're reconsidering?!", noText: "Hmm...", yesText: "You won't regret it!" },
+            { emoji: '🙏', message: "PLEASE. I'll do the dishes for a WEEK.", noText: "Tempting...", yesText: "Yes yes yes!" },
+            { emoji: '🧎', message: "A MONTH. I'll do dishes for a MONTH.", noText: "Go on...", yesText: "Pretty please?" },
+            { emoji: '👑', message: "You can be the big spoon EVERY night.", noText: "Interesting", yesText: "I'll make you happy!" },
+            { emoji: '🍕', message: "Unlimited pizza. I'm offering UNLIMITED PIZZA.", noText: "Wait what", yesText: "Trust your heart!" },
+            { emoji: '🐕', message: "We can get a puppy. TWO puppies.", noText: "Really??", yesText: "Love is the answer!" },
+            { emoji: '🎁', message: "I'll watch your shows without complaining. ANY show.", noText: "No way", yesText: "Click me instead!" },
+            { emoji: '💎', message: "I... I'll put down the toilet seat. EVERY. TIME.", noText: "😱", yesText: "I'm right here!" },
+            { emoji: '🏳️', message: "THE NO BUTTON HAS SURRENDERED!", noText: "Fine, Yes 😅", yesText: "YAAAAY!" },
         ];
 
-        let messageIndex = 0;
+        let guiltLevel = 0;
+        let yesBtnScale = 1;
         let isRunning = false;
 
-        // No button escape distance
-        const escapeDistance = 120;
-
-        // Position No button initially next to Yes button
-        function initNoButton() {
-            const container = document.querySelector('.container');
-            const containerRect = container.getBoundingClientRect();
-            const yesBtn = document.querySelector('.yes-btn');
-            const yesBtnRect = yesBtn.getBoundingClientRect();
-
-            // Position No button to the right of where Yes button is
-            noBtn.style.left = (yesBtnRect.right + 80) + 'px';
-            noBtn.style.top = yesBtnRect.top + 'px';
+        // Create rain
+        for (let i = 0; i < 100; i++) {
+            const rain = document.createElement('div');
+            rain.className = 'rain';
+            rain.style.left = Math.random() * 100 + 'vw';
+            rain.style.animationDelay = Math.random() * 2 + 's';
+            rain.style.animationDuration = (0.3 + Math.random() * 0.3) + 's';
+            document.body.appendChild(rain);
         }
 
-        // Initialize on load
+        // Position No button initially
+        function initNoButton() {
+            const yesWrapper = document.querySelector('.yes-wrapper');
+            const rect = yesWrapper.getBoundingClientRect();
+            noBtn.style.left = (rect.right + 80) + 'px';
+            noBtn.style.top = (rect.top + rect.height/2 - 30) + 'px';
+        }
+
         window.addEventListener('load', initNoButton);
         window.addEventListener('resize', initNoButton);
 
-        function showSpeechBubble() {
-            speechBubble.textContent = messages[messageIndex];
-            speechBubble.classList.add('show');
-            messageIndex = (messageIndex + 1) % messages.length;
-
-            setTimeout(() => {
-                speechBubble.classList.remove('show');
-            }, 1500);
+        // Create tear
+        function createTear() {
+            const tear = document.createElement('div');
+            tear.className = 'tear';
+            tear.textContent = '💧';
+            tear.style.left = Math.random() * 100 + 'vw';
+            tear.style.top = '20%';
+            document.body.appendChild(tear);
+            setTimeout(() => tear.remove(), 2000);
         }
 
-        // Track mouse position - active immediately
+        // Track mouse position
         document.addEventListener('mousemove', (e) => {
             const rect = noBtn.getBoundingClientRect();
             const btnCenterX = rect.left + rect.width / 2;
             const btnCenterY = rect.top + rect.height / 2;
+            const distance = Math.sqrt(Math.pow(e.clientX - btnCenterX, 2) + Math.pow(e.clientY - btnCenterY, 2));
 
-            const distX = e.clientX - btnCenterX;
-            const distY = e.clientY - btnCenterY;
-            const distance = Math.sqrt(distX * distX + distY * distY);
-
-            if (distance < escapeDistance && !isRunning) {
+            if (distance < 120 && !isRunning) {
                 isRunning = true;
 
-                // Calculate new position away from mouse
-                let newX, newY;
-                const padding = 80;
-                const btnWidth = rect.width;
-                const btnHeight = rect.height;
+                // Apply guilt stage
+                if (guiltLevel < guiltStages.length) {
+                    const stage = guiltStages[guiltLevel];
 
-                // Try to find a good spot away from mouse
-                let attempts = 0;
-                do {
-                    newX = Math.random() * (window.innerWidth - btnWidth - padding * 2) + padding;
-                    newY = Math.random() * (window.innerHeight - btnHeight - padding * 2) + padding;
-                    attempts++;
-                } while (
-                    Math.sqrt(Math.pow(e.clientX - newX, 2) + Math.pow(e.clientY - newY, 2)) < escapeDistance * 2.5 &&
-                    attempts < 20
-                );
+                    // Update emoji and message
+                    sadEmoji.textContent = stage.emoji;
+                    guiltMessage.textContent = stage.message;
+                    noBtn.textContent = stage.noText;
 
-                noBtn.style.left = newX + 'px';
-                noBtn.style.top = newY + 'px';
+                    // Show speech bubble
+                    speechBubble.textContent = stage.yesText;
+                    speechBubble.classList.add('show');
+                    setTimeout(() => speechBubble.classList.remove('show'), 1500);
 
-                // Show speech bubble from Yes button
-                showSpeechBubble();
+                    // Make things sadder after stage 4
+                    if (guiltLevel >= 4) {
+                        document.body.classList.add('sad');
+                    }
 
-                // Allow running again after transition completes
+                    // Thunder after stage 5
+                    if (guiltLevel >= 5) {
+                        thunder.classList.add('flash');
+                        setTimeout(() => thunder.classList.remove('flash'), 200);
+                    }
+
+                    // Tears after stage 2
+                    if (guiltLevel >= 2) {
+                        createTear();
+                        setTimeout(createTear, 200);
+                        setTimeout(createTear, 400);
+                    }
+
+                    // Grow Yes button
+                    yesBtnScale += 0.12;
+                    yesBtn.style.transform = `scale(${yesBtnScale})`;
+
+                    guiltLevel++;
+
+                    // Check if No button surrenders
+                    if (guiltLevel >= guiltStages.length) {
+                        noBtn.onclick = sayYes;
+                        noBtn.style.background = 'linear-gradient(45deg, #ff6b6b, #ff8e8e)';
+                        document.body.classList.remove('sad');
+                        sadEmoji.textContent = '🎉';
+                    }
+                }
+
+                // Run away (unless surrendered)
+                if (guiltLevel < guiltStages.length) {
+                    let newX, newY;
+                    const padding = 80;
+                    const btnWidth = rect.width;
+                    const btnHeight = rect.height;
+
+                    let attempts = 0;
+                    do {
+                        newX = Math.random() * (window.innerWidth - btnWidth - padding * 2) + padding;
+                        newY = Math.random() * (window.innerHeight - btnHeight - padding * 2) + padding;
+                        attempts++;
+                    } while (
+                        Math.sqrt(Math.pow(e.clientX - newX, 2) + Math.pow(e.clientY - newY, 2)) < 200 &&
+                        attempts < 20
+                    );
+
+                    noBtn.style.left = newX + 'px';
+                    noBtn.style.top = newY + 'px';
+                }
+
                 setTimeout(() => {
                     isRunning = false;
                 }, 450);
@@ -335,8 +461,6 @@
         function sayYes() {
             celebration.classList.add('active');
             yayText.textContent = yayString;
-
-            // Create glitter
             createGlitter();
             setInterval(createGlitter, 100);
         }
@@ -354,8 +478,6 @@
                 glitter.style.height = glitter.style.width;
                 glitter.style.animationDuration = (Math.random() * 2 + 1) + 's';
                 document.body.appendChild(glitter);
-
-                // Remove after animation
                 setTimeout(() => glitter.remove(), 3000);
             }
         }
