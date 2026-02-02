@@ -416,8 +416,8 @@
                         setTimeout(createTear, 400);
                     }
 
-                    // Grow Yes button
-                    yesBtnScale += 0.12;
+                    // Grow Yes button (cap at 2x size so it doesn't cover messages)
+                    yesBtnScale = Math.min(yesBtnScale + 0.08, 2);
                     yesBtn.style.transform = `scale(${yesBtnScale})`;
 
                     guiltLevel++;
@@ -428,14 +428,6 @@
                         noBtn.style.background = 'linear-gradient(45deg, #ff6b6b, #ff8e8e)';
                         document.body.classList.remove('sad');
                         sadEmoji.textContent = '🎉';
-
-                        // Move Yes button on top of No button
-                        const noRect = noBtn.getBoundingClientRect();
-                        yesBtn.style.position = 'fixed';
-                        yesBtn.style.left = noRect.left + 'px';
-                        yesBtn.style.top = noRect.top + 'px';
-                        yesBtn.style.zIndex = '60';
-                        yesBtn.style.transition = 'left 0.5s, top 0.5s';
                     }
                 }
 
