@@ -328,13 +328,13 @@
             { emoji: '🌧️', message: "Great, now it's raining. Inside. Somehow.", noText: "Okay maybe", yesText: "Choose love!" },
             { emoji: '😤', message: "Fine. FINE. I didn't want a Valentine anyway.", noText: "Let me think", yesText: "This way!" },
             { emoji: '🥹', message: "Wait really?! You're reconsidering?!", noText: "Hmm...", yesText: "You won't regret it!" },
-            { emoji: '🙏', message: "PLEASE. I'll do the dishes for a WEEK.", noText: "Tempting...", yesText: "Yes yes yes!" },
-            { emoji: '🧎', message: "A MONTH. I'll do dishes for a MONTH.", noText: "Go on...", yesText: "Pretty please?" },
+            { emoji: '🙏', message: "PLEASE. I'll do the laundry for a WEEK.", noText: "Tempting...", yesText: "Yes yes yes!" },
+            { emoji: '🧎', message: "A MONTH. I'll do laundry for a MONTH.", noText: "Go on...", yesText: "Pretty please?" },
             { emoji: '👑', message: "You can be the big spoon EVERY night.", noText: "Interesting", yesText: "I'll make you happy!" },
-            { emoji: '🍕', message: "Unlimited pizza. I'm offering UNLIMITED PIZZA.", noText: "Wait what", yesText: "Trust your heart!" },
+            { emoji: '☕', message: "Unlimited coffee. I'm offering UNLIMITED COFFEE.", noText: "Wait what", yesText: "Trust your heart!" },
             { emoji: '🐕', message: "We can get a puppy. TWO puppies.", noText: "Really??", yesText: "Love is the answer!" },
-            { emoji: '🎁', message: "I'll watch your shows without complaining. ANY show.", noText: "No way", yesText: "Click me instead!" },
-            { emoji: '💎', message: "I... I'll put down the toilet seat. EVERY. TIME.", noText: "😱", yesText: "I'm right here!" },
+            { emoji: '🥐', message: "We can go to Rua every morning!!!", noText: "No way", yesText: "Click me instead!" },
+            { emoji: '💍', message: "I... I will take your second name!!!", noText: "😱", yesText: "I'm right here!" },
             { emoji: '🏳️', message: "THE NO BUTTON HAS SURRENDERED!", noText: "Fine, Yes 😅", yesText: "YAAAAY!" },
         ];
 
@@ -428,6 +428,14 @@
                         noBtn.style.background = 'linear-gradient(45deg, #ff6b6b, #ff8e8e)';
                         document.body.classList.remove('sad');
                         sadEmoji.textContent = '🎉';
+
+                        // Move Yes button on top of No button
+                        const noRect = noBtn.getBoundingClientRect();
+                        yesBtn.style.position = 'fixed';
+                        yesBtn.style.left = noRect.left + 'px';
+                        yesBtn.style.top = noRect.top + 'px';
+                        yesBtn.style.zIndex = '60';
+                        yesBtn.style.transition = 'left 0.5s, top 0.5s';
                     }
                 }
 
